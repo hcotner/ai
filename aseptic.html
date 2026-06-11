@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aseptic Technique: Interactive Biotech Lab</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for beautiful icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom animations for the flame */
+        @keyframes flicker {
+            0%, 100% { transform: scaleY(1) scaleX(1); opacity: 0.9; }
+            50% { transform: scaleY(1.1) scaleX(0.95); opacity: 1; }
+        }
+        .flame-active {
+            animation: flicker 0.15s ease-in-out infinite alternate;
+            transform-origin: bottom center;
+        }
+        /* Convection current arrows */
+        @keyframes rise {
+            0% { transform: translateY(10px); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-40px); opacity: 0; }
+        }
+        .convection-arrow {
+            animation: rise 1.5s infinite linear;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col selection:bg-teal-500 selection:text-slate-900">
+
+    <!-- Header / Navigation Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-teal-500 to-emerald-400 p-2.5 rounded-xl text-slate-950 shadow-lg shadow-teal-500/20">
+                    <i class="fa-solid fa-flask-vial text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-teal-400">BioTech 101 Courseware</span>
+                    <h1 class="text-lg font-bold tracking-tight text-white">Aseptic Technique Masterclass</h1>
+                </div>
+            </div>
+            <!-- Score & Progress Indicator -->
+            <div class="flex items-center gap-4 bg-slate-800/60 px-4 py-2 rounded-xl border border-slate-700/50">
+                <div class="text-right">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Overall Lesson Score</span>
+                    <span id="global-score" class="text-sm font-bold text-emerald-400">0 / 100 XP</span>
+                </div>
+                <div class="w-12 h-12 rounded-full border-4 border-slate-700 flex items-center justify-center relative overflow-hidden" id="overall-progress-ring">
+                    <span id="overall-progress-text" class="text-xs font-bold text-teal-400">0%</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Sidebar Navigation & Professor Avatar Panel -->
+        <aside class="lg:col-span-3 space-y-6">
+            <!-- Professor Avatar Card -->
+            <div class="bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl p-5 border border-slate-700/60 shadow-xl relative overflow-hidden">
+                <div class="absolute -top-12 -right-12 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl"></div>
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="relative">
+                        <div class="w-16 h-16 rounded-2xl bg-teal-950 border-2 border-teal-400 flex items-center justify-center overflow-hidden">
+                            <!-- Custom Professor SVG Avatar -->
+                            <svg class="w-12 h-12 text-teal-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z"/>
+                            </svg>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white leading-tight">Dr. Bio</h3>
+                        <p class="text-xs text-teal-400">Dept. Lead & Mentor</p>
+                    </div>
+                </div>
+                <!-- Interactive Dialogue bubble from Professor -->
+                <div class="bg-slate-950/80 rounded-xl p-3 border border-slate-800 text-xs text-slate-300 leading-relaxed shadow-inner">
+                    <p id="professor-dialogue">"Hello, future biotechnologist! Welcome to your digital bench. Aseptic technique is the single most critical skill in microbiology. Let's make sure you never contaminate a culture!"</p>
+                </div>
+            </div>
+
+            <!-- Chapter Checklist Navigation -->
+            <nav class="bg-slate-900/60 rounded-2xl border border-slate-800 p-4 space-y-1">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 mb-3">Lesson Syllabus</p>
+                
+                <button onclick="switchTab('lecture')" id="nav-lecture" class="w-full flex items-center justify-between px-3 py-3 rounded-xl transition text-left bg-slate-800 border-l-4 border-teal-400 text-white">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-graduation-cap text-teal-400"></i>
+                        <span class="text-sm font-semibold">1. Core Concepts</span>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-slate-600" id="check-lecture"></i>
+                </button>
+
+                <button onclick="switchTab('lab')" id="nav-lab" class="w-full flex items-center justify-between px-3 py-3 rounded-xl transition text-left hover:bg-slate-800/50 text-slate-400">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-microscope text-teal-500/70"></i>
+                        <span class="text-sm font-semibold">2. Virtual Workstation</span>
+                    </div>
+                    <i class="fa-solid fa-circle text-xs text-slate-700" id="check-lab"></i>
+                </button>
+
+                <button onclick="switchTab('quiz')" id="nav-quiz" class="w-full flex items-center justify-between px-3 py-3 rounded-xl transition text-left hover:bg-slate-800/50 text-slate-400">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-circle-question text-teal-500/70"></i>
+                        <span class="text-sm font-semibold">3. Skill Check Quiz</span>
+                    </div>
+                    <i class="fa-solid fa-circle text-xs text-slate-700" id="check-quiz"></i>
+                </button>
+            </nav>
+
+            <!-- Quick Tips Panel -->
+            <div class="bg-slate-800/40 rounded-xl p-4 border border-slate-800">
+                <h4 class="text-xs font-bold uppercase text-slate-400 tracking-wider mb-2"><i class="fa-solid fa-lightbulb text-amber-400 mr-1"></i> Quick Glossary</h4>
+                <ul class="text-[11px] text-slate-400 space-y-1.5 list-disc list-inside">
+                    <li><strong class="text-slate-300">Aseptic:</strong> Free from contaminating microorganisms.</li>
+                    <li><strong class="text-slate-300">Inoculation:</strong> Transferring bacteria to start a new culture.</li>
+                    <li><strong class="text-slate-300">Fomite:</strong> Non-living object that can harbor microbes (bench, hands).</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Dynamic Main Stage (Tab Switching Container) -->
+        <section class="lg:col-span-9 space-y-6">
+
+            <!-- TAB 1: CORE LECTURE PORTAL -->
+            <div id="tab-lecture" class="space-y-6 transition-all duration-300">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-teal-900 to-indigo-950 rounded-3xl p-8 border border-teal-500/20 relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 p-12 opacity-10">
+                        <i class="fa-solid fa-dna text-9xl"></i>
+                    </div>
+                    <div class="max-w-2xl">
+                        <span class="bg-teal-500/20 text-teal-300 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Module One</span>
+                        <h2 class="text-3xl font-extrabold text-white mt-3 mb-4">Why Aseptic Technique Matters</h2>
+                        <p class="text-slate-300 leading-relaxed mb-6">In biotechnology, we work with microscopic life. A single microscopic spore falling from your sleeve, or bacteria from your skin, can wipe out weeks of rigorous scientific research. Today, you'll learn how to establish a invisible "bubble" of sterility.</p>
+                        <button onclick="switchTab('lab')" class="bg-gradient-to-r from-teal-400 to-emerald-500 text-slate-950 font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-teal-500/20 hover:scale-[1.02] transition">
+                            Let's Go to the Virtual Bench <i class="fa-solid fa-circle-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Three Core Contaminants Cards -->
+                <h3 class="text-xl font-bold text-white tracking-tight flex items-center gap-2"><i class="fa-solid fa-shield-virus text-teal-400"></i> The Triad of Contamination Sources</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-5 hover:border-teal-500/40 transition">
+                        <div class="w-10 h-10 rounded-xl bg-red-950/40 text-red-400 flex items-center justify-center mb-4 border border-red-500/20">
+                            <i class="fa-solid fa-wind text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-white mb-2">1. Airborne Contamination</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">Air currents in a room carry dust, fungal spores, and microscopic particles. This is why we never leave sterile tubes or agar plates open completely.</p>
+                    </div>
+
+                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-5 hover:border-teal-500/40 transition">
+                        <div class="w-10 h-10 rounded-xl bg-orange-950/40 text-orange-400 flex items-center justify-center mb-4 border border-orange-500/20">
+                            <i class="fa-solid fa-hands-wash text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-white mb-2">2. Contact & Skin Transfer</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">Your skin is covered in billions of beneficial microbes (the human microbiome). One stray touch can seed an alien culture onto your lab equipment.</p>
+                    </div>
+
+                    <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-5 hover:border-teal-500/40 transition">
+                        <div class="w-10 h-10 rounded-xl bg-purple-950/40 text-purple-400 flex items-center justify-center mb-4 border border-purple-500/20">
+                            <i class="fa-solid fa-screwdriver-wrench text-lg"></i>
+                        </div>
+                        <h4 class="font-bold text-white mb-2">3. Unsterile Equipment</h4>
+                        <p class="text-xs text-slate-300 leading-relaxed">Pipettes, inoculating loops, and glassware are full of non-sterile fomites unless they are treated with heat, autoclaving, or chemical sanitizers.</p>
+                    </div>
+                </div>
+
+                <!-- Interactive "Flame Shield" Explanation -->
+                <div class="bg-slate-800/30 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
+                    <div class="relative w-48 h-48 bg-slate-950 rounded-xl flex items-center justify-center overflow-hidden border border-slate-800">
+                        <!-- Simulated Burner Core Diagram -->
+                        <div class="absolute bottom-2 w-12 h-16 bg-slate-800 rounded"></div>
+                        <div class="absolute bottom-18 w-4 h-24 bg-gradient-to-t from-blue-600 via-teal-400 to-transparent rounded-full flame-active"></div>
+                        <!-- Animated Convection Updraft Arrows -->
+                        <div class="absolute left-12 bottom-20 text-teal-400 opacity-60 text-xs flex flex-col items-center convection-arrow"><i class="fa-solid fa-chevron-up"></i></div>
+                        <div class="absolute right-12 bottom-12 text-teal-400 opacity-40 text-xs flex flex-col items-center convection-arrow" style="animation-delay: 0.5s;"><i class="fa-solid fa-chevron-up"></i></div>
+                        <div class="absolute left-20 bottom-16 text-teal-400 opacity-50 text-xs flex flex-col items-center convection-arrow" style="animation-delay: 1s;"><i class="fa-solid fa-chevron-up"></i></div>
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <h3 class="text-xl font-bold text-white">The Secret of the Bunsen Burner</h3>
+                        <p class="text-sm text-slate-300 leading-relaxed">Why do we light a fire when we want a sterile field? It's not just to sterilize instruments in the heat. The intense thermal updraft from a Bunsen burner creates a <strong class="text-teal-400">sterile cone of protection</strong> around the flame.</p>
+                        <p class="text-sm text-slate-300 leading-relaxed">Warm air rises quickly, blowing any dust particles, fungal spores, or bacterial aerosols *up and away* from your open plates and containers. Working within <strong class="text-emerald-400">10-15 cm</strong> of the burner keeps you safe.</p>
+                        <div class="bg-indigo-950/50 border border-indigo-800/40 rounded-xl p-3 text-xs text-indigo-300 flex items-start gap-2">
+                            <i class="fa-solid fa-circle-exclamation mt-0.5 text-indigo-400"></i>
+                            <span>Remember: A cool, quiet room with minimal air currents is the ideal partner for your Bunsen burner flame.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: VIRTUAL WORKSTATION (SIMULATOR) -->
+            <div id="tab-lab" class="hidden space-y-6 transition-all duration-300">
+                <!-- Simulation Info / Stats Banner -->
+                <div class="bg-slate-800/60 rounded-2xl border border-slate-700/60 p-4 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-3 h-3 bg-teal-400 rounded-full animate-ping"></div>
+                        <h2 class="text-md font-bold text-white">Activity: Interactive Inoculation Transfer</h2>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block uppercase font-bold">Sterility Score</span>
+                            <span id="sterility-score" class="text-emerald-400 font-bold">100%</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-slate-400 block uppercase font-bold">Active Phase</span>
+                            <span id="current-phase-display" class="text-teal-400 font-bold text-sm">Phase 1: Pre-Lab Setup</span>
+                        </div>
+                        <button onclick="resetLab()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-rotate"></i> Reset Lab
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Interactive Interface -->
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+                    <!-- Column Left: The Simulated Bench View (8 cols) -->
+                    <div class="xl:col-span-8 bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden relative flex flex-col min-h-[500px]">
+                        
+                        <!-- Visual Feedback Alerts/Messages inside Simulator -->
+                        <div id="sim-alert" class="absolute top-4 left-4 right-4 bg-teal-500/90 text-slate-950 font-bold px-4 py-3 rounded-xl border border-teal-400 shadow-xl flex items-center justify-between transition-all duration-300 opacity-0 pointer-events-none z-30 transform -translate-y-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-circle-info" id="sim-alert-icon"></i>
+                                <span id="sim-alert-text">Alert message goes here</span>
+                            </div>
+                            <button onclick="hideSimAlert()" class="text-slate-950 hover:opacity-75"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <!-- 3D-like Interactive Bench Container -->
+                        <div class="flex-grow flex items-end justify-center p-8 relative overflow-hidden bg-radial-bench">
+                            
+                            <!-- Ambient Light Effect for Flame -->
+                            <div id="ambient-flame-glow" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl opacity-0 transition-all duration-500"></div>
+
+                            <!-- Laboratory Bench Graphics -->
+                            <div class="w-full flex items-end justify-around relative z-10">
+                                
+                                <!-- Ethanol Bottle & Sanitizer WIPES -->
+                                <div id="etoh-bottle" class="flex flex-col items-center gap-1 cursor-pointer hover:scale-105 transition" onclick="triggerEtOhSpray()">
+                                    <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300">70% EtOH</span>
+                                    <div class="w-14 h-24 bg-teal-900/60 rounded-xl border border-teal-500/40 relative flex items-center justify-center">
+                                        <div class="absolute -top-6 w-3 h-6 bg-slate-700 rounded-t"></div>
+                                        <div class="absolute -top-3 w-6 h-1.5 bg-slate-500"></div>
+                                        <div class="text-[10px] font-bold text-teal-300 uppercase select-none">Spray</div>
+                                    </div>
+                                </div>
+
+                                <!-- Bunsen Burner Container -->
+                                <div class="flex flex-col items-center gap-1">
+                                    <!-- Dynamic Rising Convection Updraft Arrows (Only visible when burner lit) -->
+                                    <div id="burner-updrafts" class="hidden absolute bottom-36 flex flex-col gap-2 items-center text-teal-400 opacity-60">
+                                        <div class="convection-arrow text-sm"><i class="fa-solid fa-angle-up"></i></div>
+                                        <div class="convection-arrow text-sm" style="animation-delay: 0.5s;"><i class="fa-solid fa-angle-up"></i></div>
+                                    </div>
+                                    
+                                    <div id="burner-flame" class="hidden absolute bottom-24 w-6 h-20 bg-gradient-to-t from-blue-600 via-teal-300 to-transparent rounded-full flame-active pointer-events-none z-20"></div>
+                                    
+                                    <div id="bunsen-burner" class="w-16 h-20 bg-slate-800 rounded-b-xl border border-slate-700 relative flex flex-col items-center cursor-pointer hover:scale-105 transition" onclick="strikeBurner()">
+                                        <!-- Nozzle/Tube connectors -->
+                                        <div class="absolute -top-4 w-4 h-4 bg-slate-600 border border-slate-500"></div>
+                                        <div class="absolute bottom-2 left-0 w-3 h-3 bg-slate-700 -translate-x-3 rounded-full"></div>
+                                        <div class="absolute bottom-3 left-0 w-8 h-1 bg-slate-600 -translate-x-3"></div>
+                                        <span class="text-[9px] text-slate-400 font-bold select-none uppercase absolute bottom-2">Burner</span>
+                                    </div>
+                                    <span id="burner-label" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300">Click to Light</span>
+                                </div>
+
+                                <!-- Culture Tube Rack (Donor Inoculum) -->
+                                <div id="culture-rack" class="flex flex-col items-center gap-1">
+                                    <div class="flex gap-4">
+                                        <!-- Bacterial Culture Tube -->
+                                        <div id="donor-tube" class="flex flex-col items-center gap-1 cursor-pointer hover:scale-105 transition" onclick="selectDonorTube()">
+                                            <span class="text-[9px] bg-indigo-900/40 text-indigo-300 border border-indigo-500/20 px-2 py-0.5 rounded-full">S. epidermidis</span>
+                                            <div class="w-10 h-28 bg-slate-800/80 rounded-b-full border border-slate-600/50 relative flex items-center justify-center p-2">
+                                                <!-- Cap -->
+                                                <div id="donor-cap" class="absolute -top-3 w-12 h-6 bg-red-600 rounded-t border-b-2 border-slate-900 transition-transform duration-500"></div>
+                                                <!-- Liquid Inside -->
+                                                <div class="absolute bottom-1 w-8 h-16 bg-amber-400/40 rounded-b-full blur-[0.5px]"></div>
+                                                <div class="text-[9px] text-white font-semibold z-10 select-none">TUBE</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300">Culture Rack</span>
+                                </div>
+
+                                <!-- Inoculating Loop in Holder -->
+                                <div id="loop-holder" class="flex flex-col items-center gap-1">
+                                    <div id="inoculating-loop" class="w-10 h-32 flex flex-col items-center cursor-pointer hover:scale-105 transition" onclick="selectInoculatingLoop()">
+                                        <!-- Holder Stem -->
+                                        <div class="w-1 h-14 bg-slate-600"></div>
+                                        <!-- Wire element that glows when heated -->
+                                        <div id="loop-wire" class="w-[2px] h-14 bg-slate-400 transition-all duration-1000 relative">
+                                            <!-- The Loop itself -->
+                                            <div id="loop-head" class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-slate-400 bg-transparent transition-all duration-1000"></div>
+                                        </div>
+                                    </div>
+                                    <span id="loop-status-tag" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300">Inoculating Loop</span>
+                                </div>
+
+                                <!-- Target Sterile Petri Dish / Agar Plate -->
+                                <div id="target-dish" class="flex flex-col items-center gap-1 cursor-pointer hover:scale-105 transition" onclick="selectPetriDish()">
+                                    <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300">Target Plate</span>
+                                    <div class="w-24 h-20 relative flex items-center justify-center">
+                                        <!-- Bottom of plate with agar inside -->
+                                        <div class="absolute bottom-0 w-24 h-6 bg-slate-700/80 rounded-b-full border border-slate-600 relative">
+                                            <div class="absolute bottom-0.5 left-1 w-22 h-4 bg-orange-300/40 rounded-b-full"></div>
+                                        </div>
+                                        <!-- Clamshell Lid that raises slightly -->
+                                        <div id="petri-lid" class="absolute top-2 w-26 h-8 bg-slate-500/30 rounded-full border border-slate-400/40 transition-transform duration-500 origin-right"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Interactive Bench Console/Progress Status Area -->
+                        <div class="bg-slate-900 border-t border-slate-800 p-4 flex items-center justify-between text-xs text-slate-400">
+                            <div>
+                                <i class="fa-solid fa-clipboard-question mr-1 text-teal-400"></i> Active Instruction:
+                                <p id="bench-instruction" class="text-white font-medium mt-1 text-sm">Please suit up! Click the PPE gear in the right panel to begin.</p>
+                            </div>
+                            <div class="flex items-center gap-4 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
+                                <div class="text-center">
+                                    <span class="text-[9px] uppercase tracking-wider block">Loop Temperature</span>
+                                    <span id="loop-temp-indicator" class="text-teal-400 font-bold uppercase text-[11px]">Ambient (Cold)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Right: The Interactive Lab Manual & Controls (4 cols) -->
+                    <div class="xl:col-span-4 flex flex-col gap-6">
+                        
+                        <!-- PPE Checkbox Panel (Step 1) -->
+                        <div id="panel-ppe" class="bg-slate-800/50 rounded-2xl p-5 border border-slate-700/60 shadow-xl space-y-4">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-shield text-teal-400"></i> Essential Personal Protective Equipment (PPE)</h3>
+                            <p class="text-xs text-slate-300">Before entering the laboratory bench space, select all mandatory safety gear to protect yourself and prevent contamination.</p>
+                            
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-teal-500/50 transition">
+                                    <input type="checkbox" id="ppe-coat" onchange="checkPPE()" class="w-4 h-4 rounded text-teal-500 focus:ring-teal-500 bg-slate-800 border-slate-700">
+                                    <div>
+                                        <span class="text-xs font-bold text-white block">Standard Lab Coat</span>
+                                        <span class="text-[10px] text-slate-400">Protects clothing and arms from chemical/biological spills.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-teal-500/50 transition">
+                                    <input type="checkbox" id="ppe-gloves" onchange="checkPPE()" class="w-4 h-4 rounded text-teal-500 focus:ring-teal-500 bg-slate-800 border-slate-700">
+                                    <div>
+                                        <span class="text-xs font-bold text-white block">Nitrile Gloves</span>
+                                        <span class="text-[10px] text-slate-400">Prevents contact transfer from normal skin biota.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-teal-500/50 transition">
+                                    <input type="checkbox" id="ppe-goggles" onchange="checkPPE()" class="w-4 h-4 rounded text-teal-500 focus:ring-teal-500 bg-slate-800 border-slate-700">
+                                    <div>
+                                        <span class="text-xs font-bold text-white block">Safety Glasses</span>
+                                        <span class="text-[10px] text-slate-400">Guards eyes against splash-back and thermal hazards.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Step-by-Step Interactive Lab Guide (Steps 2-6) -->
+                        <div id="panel-guide" class="bg-slate-800/50 rounded-2xl p-5 border border-slate-700/60 shadow-xl space-y-4 hidden">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-map-signs text-teal-400"></i> Active Transfer Guide</h3>
+                            <div class="space-y-4">
+                                <div id="phase-step-card-2" class="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex gap-3">
+                                    <span class="w-6 h-6 rounded-full bg-slate-800 text-teal-400 font-bold flex items-center justify-center text-xs shrink-0" id="bullet-step-2">2</span>
+                                    <div class="text-xs">
+                                        <strong class="text-white block">Sanitize Work Area</strong>
+                                        <p class="text-slate-400 mt-0.5">Click the 70% EtOH bottle to spray the benchtop. Clean bench avoids environmental fomite interference.</p>
+                                    </div>
+                                </div>
+
+                                <div id="phase-step-card-3" class="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex gap-3 opacity-50">
+                                    <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs shrink-0" id="bullet-step-3">3</span>
+                                    <div class="text-xs">
+                                        <strong class="text-slate-300 block">Ignite Thermal Updraft</strong>
+                                        <p class="text-slate-400 mt-0.5">Click the Bunsen Burner base to fire it up, creating the protective convection current cone.</p>
+                                    </div>
+                                </div>
+
+                                <div id="phase-step-card-4" class="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex gap-3 opacity-50">
+                                    <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs shrink-0" id="bullet-step-4">4</span>
+                                    <div class="text-xs">
+                                        <strong class="text-slate-300 block">Flame Sterilize Loop</strong>
+                                        <p class="text-slate-400 mt-0.5">Click the inoculating loop. It must glow orange-red in the flame, then cool for 4 seconds so you don't fry your cells!</p>
+                                    </div>
+                                </div>
+
+                                <div id="phase-step-card-5" class="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex gap-3 opacity-50">
+                                    <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs shrink-0" id="bullet-step-5">5</span>
+                                    <div class="text-xs">
+                                        <strong class="text-slate-300 block">Flame Mouth of Culture Tube</strong>
+                                        <p class="text-slate-400 mt-0.5">Open the bacterial donor tube. Always pass the mouth through the flame to kill passive dust on glass neck.</p>
+                                    </div>
+                                </div>
+
+                                <div id="phase-step-card-6" class="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex gap-3 opacity-50">
+                                    <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs shrink-0" id="bullet-step-6">6</span>
+                                    <div class="text-xs">
+                                        <strong class="text-slate-300 block">Acquire Sample & Clamshell Streaking</strong>
+                                        <p class="text-slate-400 mt-0.5">Dip the cool loop, recap the tube, and streak the plate while holding lid like an umbrella (clamshelling).</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sterility Log Console -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+                            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-receipt text-teal-400"></i> Live Sterility Log</h3>
+                            <div class="h-28 bg-slate-950 rounded-xl p-3 text-[10px] code-font overflow-y-auto space-y-1 text-slate-400" id="sim-terminal-log">
+                                <div>[SYS]: Simulation Engine Online. Initializing...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: MCQ ASSESSMENT / SKILL CHECK -->
+            <div id="tab-quiz" class="hidden space-y-6 transition-all duration-300">
+                <div class="bg-gradient-to-r from-emerald-950 to-slate-900 rounded-3xl p-6 border border-emerald-500/20 shadow-2xl">
+                    <h2 class="text-2xl font-extrabold text-white mb-2"><i class="fa-solid fa-clipboard-list text-emerald-400 mr-2"></i> Biotech Lab Competency Quiz</h2>
+                    <p class="text-slate-300 text-sm">Now that you've practiced the physical protocols, let's lock in your laboratory intuition with five scenario-based evaluation questions.</p>
+                </div>
+
+                <div class="space-y-6" id="quiz-container">
+                    <!-- Questions are generated dynamically via JavaScript below for optimal interactive state management -->
+                </div>
+
+                <!-- Complete / Grading Assessment Modal UI element -->
+                <div id="quiz-grading-card" class="hidden bg-slate-800/80 rounded-3xl p-8 border border-slate-700/80 text-center max-w-xl mx-auto space-y-6">
+                    <div class="w-20 h-20 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto text-teal-400 text-4xl border border-teal-500/30">
+                        <i class="fa-solid fa-graduation-cap animate-bounce"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-white">Assessment Evaluated!</h3>
+                        <p class="text-slate-300 text-sm">Your Biotech Laboratory credentials score has been registered.</p>
+                    </div>
+                    <div class="text-4xl font-extrabold text-teal-400" id="quiz-final-score">0 / 5 Correct</div>
+                    <p id="quiz-feedback-sentence" class="text-xs text-slate-400 max-w-md mx-auto"></p>
+                    <button onclick="resetQuiz()" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 px-6 py-2 rounded-xl text-xs font-bold text-white transition">
+                        Retake Assessment
+                    </button>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Global Footer -->
+    <footer class="border-t border-slate-800 bg-slate-950/80 mt-12 py-6 text-center text-xs text-slate-500">
+        <p>&copy; 2026 Virtual Biotech Consortium. All rights reserved. Designed for active learning.</p>
+    </footer>
+
+    <!-- Core Game Engine Logic -->
+    <script>
+        // Global State Tree
+        const state = {
+            currentTab: 'lecture',
+            currentPhase: 1, // 1: Pre-PPE, 2: Disinfect, 3: Burner, 4: Loop heat, 5: Tube lip, 6: Transfer & streak, 7: Final sterilization
+            ppeSelected: { coat: false, gloves: false, goggles: false },
+            isBurnerLit: false,
+            isBenchDisinfected: false,
+            loopTemperature: 'ambient', // ambient, flaming, sterile-cool
+            loopHotTimer: null,
+            loopCoolingPeriod: 4000, // ms
+            sampleAcquired: false,
+            cultureMouthFlamed: false,
+            tubeUncapped: false,
+            sterilityScore: 100,
+            hasInoculatedPlate: false,
+            scores: {
+                lectureComplete: false,
+                labComplete: false,
+                quizScore: 0
+            },
+            quizAnswers: {}
+        };
+
+        const quizData = [
+            {
+                id: 1,
+                question: "While inoculating S. epidermidis broth, you accidentally touch the loop wire to the outer neck/glass exterior of the donor tube before dipping. What must you do next?",
+                options: [
+                    "A) Shake it off in the air and continue the transfer.",
+                    "B) Flame-sterilize the loop completely, let it cool, and start the donor tube access step again.",
+                    "C) Proceed immediately to inoculate your sterile target media since heat was applied to tube lip earlier.",
+                    "D) Pour ethanol on the loop to quickly sterilize it."
+                ],
+                correct: 1,
+                explanation: "Any contact with non-sterile environments (like the tube exterior) immediately ruins sterile conditions. You must restart sterilization of the loop to ensure your inoculum stays pure."
+            },
+            {
+                id: 2,
+                question: "Why must you wait 5-10 seconds for the inoculating loop to cool down after flaming it in the Bunsen burner?",
+                options: [
+                    "A) Extreme heat will shatter the glass tube on contact.",
+                    "B) The heat of the loop will instantly kill (cook) the bacterial cells, leaving you with zero viable cells to transfer.",
+                    "C) Hot loop wires react chemically with normal oxygen creating toxic nitrogen gases.",
+                    "D) It allows the metal to expand to hold more liquid."
+                ],
+                correct: 1,
+                explanation: "Microorganisms are highly sensitive to heat. Placing a red-hot metal loop into a bacterial liquid culture will instantly fry/kill the cells, preventing any growth in your target inoculation."
+            },
+            {
+                id: 3,
+                question: "While streaking your agar plate inside the Bunsen burner zone, how should you manipulate the plate's plastic lid?",
+                options: [
+                    "A) Take the lid off completely and place it face-down on your sanitized bench.",
+                    "B) Take the lid off completely and hold it face-up in your hands.",
+                    "C) Open the lid at a slight 45-degree angle (clamshell technique), acting like an umbrella blocking falling air contamination.",
+                    "D) Completely discard the lid as the convection updraft makes it redundant."
+                ],
+                correct: 2,
+                explanation: "The 'clamshelling' technique keeps the lid covering the open surface of your agar from gravity-fed particles and falling spores in the lab room."
+            },
+            {
+                id: 4,
+                question: "Which sequence correctly details the entrance procedure for standard microbiological aseptic procedures?",
+                options: [
+                    "A) Wipe bench with EtOH -> Light Burner -> Suit up in PPE.",
+                    "B) Suit up in PPE -> Light Burner -> Flame Loop -> Sanitise Bench.",
+                    "C) Suit up in PPE -> Sanitise Bench -> Light Burner -> Flame Loop.",
+                    "D) Light Burner -> Suit up in PPE -> Flame Loop."
+                ],
+                correct: 2,
+                explanation: "First protect yourself & work area with proper PPE. Second, disinfect the workspace (fomites) using chemical sanitizer (70% EtOH). Third, light the burner to establish the sterile zone before handling instruments."
+            },
+            {
+                id: 5,
+                question: "After complete streak inoculation, what is the mandatory protocol before setting the inoculating loop back on the workstation rack?",
+                options: [
+                    "A) Wipe the metal loop down with a disinfectant paper tissue.",
+                    "B) Dip the loop in water to cool it down.",
+                    "C) Flame-sterilize the loop once again to destroy residual bacterial residue.",
+                    "D) Nothing, the plate streaking step wiped the loop clean automatically."
+                ],
+                correct: 2,
+                explanation: "Safety first! You must flame-sterilize the loop immediately after transfer to avoid introducing active living contaminants onto the storage bench/rack or your hands."
+            }
+        ];
+
+        // Terminal Log helper
+        function logSim(message, type = 'info') {
+            const container = document.getElementById('sim-terminal-log');
+            const colorClass = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-emerald-400' : 'text-slate-400';
+            const logItem = document.createElement('div');
+            logItem.className = `${colorClass} py-0.5 border-b border-slate-900`;
+            logItem.innerHTML = `<span>[${new Date().toLocaleTimeString()}]:</span> ${message}`;
+            container.appendChild(logItem);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Show/Hide Alert banner inside Simulator
+        function showSimAlert(message, type = 'info') {
+            const alertBox = document.getElementById('sim-alert');
+            const alertText = document.getElementById('sim-alert-text');
+            const alertIcon = document.getElementById('sim-alert-icon');
+            
+            alertText.textContent = message;
+            alertBox.className = "absolute top-4 left-4 right-4 text-slate-950 font-bold px-4 py-3 rounded-xl border shadow-xl flex items-center justify-between transition-all duration-300 z-30 transform translate-y-0";
+            
+            if (type === 'error') {
+                alertBox.classList.add('bg-red-400', 'border-red-500');
+                alertIcon.className = "fa-solid fa-triangle-exclamation mr-2";
+            } else if (type === 'success') {
+                alertBox.classList.add('bg-emerald-400', 'border-emerald-500');
+                alertIcon.className = "fa-solid fa-circle-check mr-2";
+            } else {
+                alertBox.classList.add('bg-teal-400', 'border-teal-500');
+                alertIcon.className = "fa-solid fa-circle-info mr-2";
+            }
+            alertBox.style.opacity = '1';
+            alertBox.style.pointerEvents = 'auto';
+        }
+
+        function hideSimAlert() {
+            const alertBox = document.getElementById('sim-alert');
+            alertBox.style.opacity = '0';
+            alertBox.style.pointerEvents = 'none';
+            alertBox.classList.add('-translate-y-2');
+        }
+
+        // Navigation Controller
+        function switchTab(tabName) {
+            document.getElementById(`tab-${state.currentTab}`).classList.add('hidden');
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            
+            // Adjust visual classes in sidebar
+            document.getElementById(`nav-${state.currentTab}`).className = "w-full flex items-center justify-between px-3 py-3 rounded-xl transition text-left hover:bg-slate-800/50 text-slate-400";
+            document.getElementById(`nav-${tabName}`).className = "w-full flex items-center justify-between px-3 py-3 rounded-xl transition text-left bg-slate-800 border-l-4 border-teal-400 text-white";
+            
+            // Mark lecture complete once navigated out of it
+            if (state.currentTab === 'lecture') {
+                state.scores.lectureComplete = true;
+                updateOverallProgress();
+            }
+
+            state.currentTab = tabName;
+            updateProfessorDialogue();
+        }
+
+        // Update Dr. Bio Speech Bubbles
+        function updateProfessorDialogue() {
+            const textElement = document.getElementById('professor-dialogue');
+            if (state.currentTab === 'lecture') {
+                textElement.textContent = `"Always remember, sterilization isn't about working in a completely sterile room—it is about keeping our critical zones protected from environmental invaders!"`;
+            } else if (state.currentTab === 'lab') {
+                switch(state.currentPhase) {
+                    case 1:
+                        textElement.textContent = `"Safety always comes first, student! Put on your Lab Coat, Nitrile Gloves, and Safety Glasses before we begin handling biological agents."`;
+                        break;
+                    case 2:
+                        textElement.textContent = `"Splendid. Now let's sanitise our bench zone. Use that 70% ethanol bottle to spray down our table and eliminate existing passive contaminants."`;
+                        break;
+                    case 3:
+                        textElement.textContent = `"Nice and clean. Now ignite that Bunsen burner! We need the heat convection updraft to form our clean cone of protection."`;
+                        break;
+                    case 4:
+                        textElement.textContent = `"We need to flame-sterilize our inoculating loop now. Place the wire directly into the blue hot core until it glows red, then wait for it to cool down so we don't kill our donor bacteria!"`;
+                        break;
+                    case 5:
+                        textElement.textContent = `"Carefully lift the bacterial culture tube and flame its neck before dipping the sterilized loop. It keeps falling airborne microbes out!"`;
+                        break;
+                    case 6:
+                        textElement.textContent = `"Gently open the Petri dish lid like a clam-shell (keeping it half covered) and streak the cool loop onto the agar surface."`;
+                        break;
+                    case 7:
+                        textElement.textContent = `"Excellent inoculation streak! Before putting the loop down on the rack, we must flame it one final time to kill residual microbes. Safety and respect for bio-agents is crucial!"`;
+                        break;
+                    default:
+                        textElement.textContent = `"Excellent performance on the virtual bench! Feel free to reset and practice, or move directly to the assessment check."`;
+                }
+            } else if (state.currentTab === 'quiz') {
+                textElement.textContent = `"Time for your certification check! Answer these scenario-based biotechnology prompts to confirm your sterile tech skill set."`;
+            }
+        }
+
+        // --- SIMULATOR LOGIC IMPLEMENTATION ---
+
+        // Step 1: Check PPE Elements
+        function checkPPE() {
+            state.ppeSelected.coat = document.getElementById('ppe-coat').checked;
+            state.ppeSelected.gloves = document.getElementById('ppe-gloves').checked;
+            state.ppeSelected.goggles = document.getElementById('ppe-goggles').checked;
+
+            if (state.ppeSelected.coat && state.ppeSelected.gloves && state.ppeSelected.goggles) {
+                state.currentPhase = 2;
+                logSim("PPE verification successful. Goggles, Gloves, & Coat armed.", "success");
+                showSimAlert("Perfect! Safety requirements satisfied. Workstation is ready.", "success");
+                
+                // Hide PPE panel, transition to Lab Guide
+                document.getElementById('panel-ppe').classList.add('hidden');
+                document.getElementById('panel-guide').classList.remove('hidden');
+                
+                document.getElementById('bench-instruction').textContent = "Step 2: Spray down your lab bench surface with 70% Ethanol to disinfect. Click the EtOH bottle.";
+                updateProfessorDialogue();
+            }
+        }
+
+        // Step 2: Disinfect Bench
+        function triggerEtOhSpray() {
+            if (state.currentPhase !== 2) {
+                showSimAlert("You already sanitized the area or are missing prior steps!", "error");
+                return;
+            }
+            state.isBenchDisinfected = true;
+            logSim("Applying 70% Iso-Propanol/Ethanol solution to work surface...", "info");
+            logSim("Bench disinfected. Eliminating fomite vector pathways.", "success");
+            showSimAlert("Awesome! Bench is sanitised and clean.", "success");
+            
+            // Advance state
+            state.currentPhase = 3;
+            document.getElementById('bullet-step-2').className = "w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs shrink-0";
+            document.getElementById('bullet-step-2').innerHTML = `<i class="fa-solid fa-check"></i>`;
+            document.getElementById('phase-step-card-2').classList.add('opacity-50');
+            document.getElementById('phase-step-card-3').classList.remove('opacity-50');
+            document.getElementById('bullet-step-3').classList.add('text-teal-400');
+            
+            document.getElementById('bench-instruction').textContent = "Step 3: Click the Bunsen Burner to ignite the gas stream and establish the convective sterile cone.";
+            updateProfessorDialogue();
+        }
+
+        // Step 3: Ignite Bunsen Burner
+        function strikeBurner() {
+            if (state.currentPhase !== 3) {
+                if (state.currentPhase < 3) {
+                    showSimAlert("Hold on! Disinfect your bench first with the EtOH bottle.", "error");
+                } else {
+                    showSimAlert("Bunsen burner is already lit!", "info");
+                }
+                return;
+            }
+            
+            state.isBurnerLit = true;
+            document.getElementById('burner-flame').classList.remove('hidden');
+            document.getElementById('burner-updrafts').classList.remove('hidden');
+            document.getElementById('ambient-flame-glow').style.opacity = '1';
+            document.getElementById('burner-label').textContent = "LIT & HEATING";
+            document.getElementById('burner-label').className = "text-[10px] bg-teal-950 text-teal-400 px-2 py-0.5 rounded-full border border-teal-500/50";
+            
+            logSim("Gas valves open. Igniting Bunsen Burner. Convection shield established.", "success");
+            showSimAlert("Burner lit! Notice the warm updrafts keeping contaminants away.", "success");
+            
+            // Advance state
+            state.currentPhase = 4;
+            document.getElementById('bullet-step-3').className = "w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs shrink-0";
+            document.getElementById('bullet-step-3').innerHTML = `<i class="fa-solid fa-check"></i>`;
+            document.getElementById('phase-step-card-3').classList.add('opacity-50');
+            document.getElementById('phase-step-card-4').classList.remove('opacity-50');
+            document.getElementById('bullet-step-4').classList.add('text-teal-400');
+            
+            document.getElementById('bench-instruction').textContent = "Step 4: Flame sterilize your Inoculating Loop. Click on the Loop handle to place it in the flame.";
+            updateProfessorDialogue();
+        }
+
+        // Step 4: Flame Sterilize Loop
+        function selectInoculatingLoop() {
+            if (state.currentPhase !== 4) {
+                if (state.currentPhase < 4) {
+                    showSimAlert("You must light the Bunsen Burner before you can heat sterilize!", "error");
+                } else if (state.currentPhase > 4) {
+                    showSimAlert("Your loop is already sterile. Focus on the transfer step!", "info");
+                }
+                return;
+            }
+
+            logSim("Holding inoculating loop over direct inner cone flame...", "info");
+            document.getElementById('loop-wire').className = "w-[2px] h-14 bg-orange-500 shadow-[0_0_8px_rgba(239,127,26,0.8)] transition-all duration-1000 relative";
+            document.getElementById('loop-head').className = "absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-orange-500 bg-orange-400 shadow-[0_0_8px_rgba(239,127,26,0.8)] transition-all duration-1000";
+            state.loopTemperature = 'flaming';
+            document.getElementById('loop-temp-indicator').textContent = "Glowing Hot (Dangerous)";
+            document.getElementById('loop-temp-indicator').className = "text-red-400 font-bold uppercase text-[11px]";
+            
+            // Wait 2.5 seconds to turn hot, then cool down sequence
+            setTimeout(() => {
+                logSim("Loop sterilized (red hot achieved). Removing from flame to cool...", "success");
+                document.getElementById('loop-wire').className = "w-[2px] h-14 bg-slate-400 transition-all duration-1000 relative";
+                document.getElementById('loop-head').className = "absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-slate-400 bg-transparent transition-all duration-1000";
+                
+                // Start cooling timer
+                let coolingSeconds = 4;
+                const coolingInterval = setInterval(() => {
+                    coolingSeconds--;
+                    document.getElementById('loop-temp-indicator').textContent = `Cooling (${coolingSeconds}s)`;
+                    document.getElementById('loop-temp-indicator').className = "text-amber-400 font-bold uppercase text-[11px]";
+                    
+                    if (coolingSeconds <= 0) {
+                        clearInterval(coolingInterval);
+                        state.loopTemperature = 'sterile-cool';
+                        document.getElementById('loop-temp-indicator').textContent = "Sterile & Cooled";
+                        document.getElementById('loop-temp-indicator').className = "text-emerald-400 font-bold uppercase text-[11px]";
+                        logSim("Inoculating loop is cooled down and ready to collect sample.", "info");
+                        showSimAlert("Excellent sterilization sequence! Let's handle the donor tube now.", "success");
+                        
+                        // Advance State
+                        state.currentPhase = 5;
+                        document.getElementById('bullet-step-4').className = "w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs shrink-0";
+                        document.getElementById('bullet-step-4').innerHTML = `<i class="fa-solid fa-check"></i>`;
+                        document.getElementById('phase-step-card-4').classList.add('opacity-50');
+                        document.getElementById('phase-step-card-5').classList.remove('opacity-50');
+                        document.getElementById('bullet-step-5').classList.add('text-teal-400');
+                        
+                        document.getElementById('bench-instruction').textContent = "Step 5: Click the Bacterial Culture Tube to pull off the cap and pass its glass mouth through the flame.";
+                        updateProfessorDialogue();
+                    }
+                }, 1000);
+
+            }, 2500);
+        }
+
+        // Step 5: Donor Tube Opening & Flame Lip
+        function selectDonorTube() {
+            if (state.currentPhase !== 5) {
+                if (state.currentPhase < 5) {
+                    showSimAlert("Hold on! Your inoculating loop needs to be flame sterilized and cooled first.", "error");
+                } else {
+                    showSimAlert("You've already retrieved the inoculum!", "info");
+                }
+                return;
+            }
+
+            // Simulate Uncapping and immediate flaming of mouth
+            logSim("Removing culture cap using pinky finger technique...", "info");
+            document.getElementById('donor-cap').style.transform = "translateY(-40px) rotate(45deg)";
+            
+            setTimeout(() => {
+                logSim("Passing tube mouth through outer flame cone...", "info");
+                logSim("Mouth heated. Airborne dust vectors neutralized.", "success");
+                state.cultureMouthFlamed = true;
+                
+                // Now prompt step 6
+                state.currentPhase = 6;
+                document.getElementById('bullet-step-5').className = "w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs shrink-0";
+                document.getElementById('bullet-step-5').innerHTML = `<i class="fa-solid fa-check"></i>`;
+                document.getElementById('phase-step-card-5').classList.add('opacity-50');
+                document.getElementById('phase-step-card-6').classList.remove('opacity-50');
+                document.getElementById('bullet-step-6').classList.add('text-teal-400');
+                
+                document.getElementById('bench-instruction').textContent = "Step 6: Dip loop into the flamed culture tube, then click the Target Plate (Petri dish) to streak it using clamshell lid protection!";
+                updateProfessorDialogue();
+                
+                // Visual simulation dip
+                logSim("Dipping sterile cooled loop into S. epidermidis broth.", "success");
+                state.sampleAcquired = true;
+            }, 1000);
+        }
+
+        // Step 6: Streak Target Petri Dish
+        function selectPetriDish() {
+            if (state.currentPhase !== 6) {
+                if (state.currentPhase < 6) {
+                    showSimAlert("Acquire your culture inoculum sample from the rack first!", "error");
+                } else {
+                    showSimAlert("Plate inoculation has already been accomplished.", "info");
+                }
+                return;
+            }
+
+            if (!state.sampleAcquired) {
+                showSimAlert("Grab sample from flamed culture tube first!", "error");
+                return;
+            }
+
+            // Lift Lid clam shell
+            logSim("Lifting petri dish cover using clamshell shielding...", "info");
+            document.getElementById('petri-lid').style.transform = "translateY(-15px) rotate(-15deg)";
+            
+            setTimeout(() => {
+                logSim("Performing isolation streak sequence on nutrient agar...", "success");
+                document.getElementById('petri-lid').style.transform = "translateY(0) rotate(0)";
+                logSim("Lid re-secured. Contamination pathway sealed.", "success");
+                showSimAlert("Superb! You successfully clamshelled the plate while streaking.", "success");
+                
+                // Close donor tube cap visually
+                document.getElementById('donor-cap').style.transform = "translateY(0) rotate(0)";
+                
+                // Move to Final Phase 7
+                state.currentPhase = 7;
+                document.getElementById('bullet-step-6').className = "w-6 h-6 rounded-full bg-emerald-500 text-slate-950 font-bold flex items-center justify-center text-xs shrink-0";
+                document.getElementById('bullet-step-6').innerHTML = `<i class="fa-solid fa-check"></i>`;
+                document.getElementById('phase-step-card-6').classList.add('opacity-50');
+                
+                document.getElementById('bench-instruction').textContent = "Final Step: Safety clean! Flame sterilize the loop one last time before resting it on the rack. Click Loop.";
+                
+                // Change status tags to show it needs final flame
+                document.getElementById('loop-status-tag').textContent = "Contaminated Loop (Click to Flame)";
+                document.getElementById('loop-status-tag').className = "text-[10px] bg-red-950 text-red-400 px-2 py-0.5 rounded-full border border-red-500/30";
+                
+                // Setup listener for final action
+                document.getElementById('inoculating-loop').onclick = performFinalSterilization;
+                updateProfessorDialogue();
+            }, 2000);
+        }
+
+        function performFinalSterilization() {
+            if (state.currentPhase !== 7) return;
+            
+            logSim("Flaming inoculating loop to destroy residual bacterial inoculum...", "info");
+            document.getElementById('loop-wire').className = "w-[2px] h-14 bg-orange-500 shadow-[0_0_8px_rgba(239,127,26,0.8)] transition-all duration-1000 relative";
+            document.getElementById('loop-head').className = "absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-orange-500 bg-orange-400 shadow-[0_0_8px_rgba(239,127,26,0.8)] transition-all duration-1000";
+            
+            setTimeout(() => {
+                document.getElementById('loop-wire').className = "w-[2px] h-14 bg-slate-400 transition-all duration-1000 relative";
+                document.getElementById('loop-head').className = "absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-slate-400 bg-transparent transition-all duration-1000";
+                logSim("Post-procedure sterilisation completed. Loop safe.", "success");
+                showSimAlert("Outstanding work! You completed the sterile transfer protocol perfectly.", "success");
+                
+                state.currentPhase = 8;
+                state.scores.labComplete = true;
+                
+                document.getElementById('loop-status-tag').textContent = "Sterile & Safe";
+                document.getElementById('loop-status-tag').className = "text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30";
+                
+                document.getElementById('bench-instruction').innerHTML = "<span class='text-emerald-400 font-bold'><i class='fa-solid fa-trophy mr-1'></i> Workstation Cleared!</span> Head over to Chapter 3 (Skill Check) to finish your lesson!";
+                
+                // Turn off burner visually
+                document.getElementById('burner-flame').classList.add('hidden');
+                document.getElementById('burner-updrafts').classList.add('hidden');
+                document.getElementById('ambient-flame-glow').style.opacity = '0';
+                document.getElementById('burner-label').textContent = "OFF / SAFE";
+                document.getElementById('burner-label').className = "text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700";
+                
+                // Update overall course stats
+                updateOverallProgress();
+                updateProfessorDialogue();
+                
+                document.getElementById('check-lab').className = "fa-solid fa-circle-check text-emerald-500";
+            }, 2000);
+        }
+
+        // Reset Simulator
+        function resetLab() {
+            state.currentPhase = 1;
+            state.ppeSelected = { coat: false, gloves: false, goggles: false };
+            state.isBurnerLit = false;
+            state.isBenchDisinfected = false;
+            state.loopTemperature = 'ambient';
+            state.sampleAcquired = false;
+            state.cultureMouthFlamed = false;
+            state.hasInoculatedPlate = false;
+            
+            document.getElementById('sim-terminal-log').innerHTML = "<div>[SYS]: Lab Station reset. Ready for training...</div>";
+            document.getElementById('panel-ppe').classList.remove('hidden');
+            document.getElementById('panel-guide').classList.add('hidden');
+            
+            // Checkboxes reset
+            document.getElementById('ppe-coat').checked = false;
+            document.getElementById('ppe-gloves').checked = false;
+            document.getElementById('ppe-goggles').checked = false;
+            
+            // Burner flame reset
+            document.getElementById('burner-flame').classList.add('hidden');
+            document.getElementById('burner-updrafts').classList.add('hidden');
+            document.getElementById('ambient-flame-glow').style.opacity = '0';
+            document.getElementById('burner-label').textContent = "Click to Light";
+            document.getElementById('burner-label').className = "text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300";
+            
+            // Guides reset
+            for (let i = 2; i <= 6; i++) {
+                const b = document.getElementById(`bullet-step-${i}`);
+                b.className = "w-6 h-6 rounded-full bg-slate-800 text-slate-400 font-bold flex items-center justify-center text-xs shrink-0";
+                b.textContent = i;
+                document.getElementById(`phase-step-card-${i}`).classList.add('opacity-50');
+            }
+            document.getElementById(`phase-step-card-2`).classList.remove('opacity-50');
+            document.getElementById(`bullet-step-2`).className = "w-6 h-6 rounded-full bg-slate-800 text-teal-400 font-bold flex items-center justify-center text-xs shrink-0";
+            
+            // Loop rack reset
+            document.getElementById('loop-wire').className = "w-[2px] h-14 bg-slate-400 relative";
+            document.getElementById('loop-head').className = "absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full border border-slate-400 bg-transparent";
+            document.getElementById('loop-status-tag').textContent = "Inoculating Loop";
+            document.getElementById('loop-status-tag').className = "text-[10px] bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700 text-slate-300";
+            document.getElementById('loop-temp-indicator').textContent = "Ambient (Cold)";
+            document.getElementById('loop-temp-indicator').className = "text-teal-400 font-bold uppercase text-[11px]";
+            
+            // Interactive listener reset
+            document.getElementById('inoculating-loop').onclick = selectInoculatingLoop;
+            
+            // Caps & Lids reset
+            document.getElementById('donor-cap').style.transform = "translateY(0) rotate(0)";
+            document.getElementById('petri-lid').style.transform = "translateY(0) rotate(0)";
+            
+            document.getElementById('bench-instruction').textContent = "Please suit up! Click the PPE gear in the right panel to begin.";
+            
+            hideSimAlert();
+            updateProfessorDialogue();
+        }
+
+        // --- ASSESSMENT / QUIZ LOGIC IMPLEMENTATION ---
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+            
+            quizData.forEach((q, idx) => {
+                const qCard = document.createElement('div');
+                qCard.className = "bg-slate-800/40 rounded-2xl p-6 border border-slate-700/40 space-y-4 shadow-lg";
+                qCard.id = `quiz-q-${q.id}`;
+                
+                let optionsHtml = '';
+                q.options.forEach((opt, optIdx) => {
+                    optionsHtml += `
+                        <button onclick="submitQuizAnswer(${q.id}, ${optIdx})" id="opt-${q.id}-${optIdx}" class="w-full text-left p-4 rounded-xl bg-slate-900/50 hover:bg-slate-900 border border-slate-800 hover:border-teal-500/40 transition text-sm text-slate-300 flex items-start gap-3">
+                            <span class="w-5 h-5 rounded-full border border-slate-700 flex items-center justify-center text-xs shrink-0 mt-0.5 text-slate-400" id="bullet-${q.id}-${optIdx}">${String.fromCharCode(65 + optIdx)}</span>
+                            <span>${opt}</span>
+                        </button>
+                    `;
+                });
+
+                qCard.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <span class="text-xs uppercase tracking-wider font-bold text-teal-400">Question ${idx + 1} of 5</span>
+                        <span id="badge-feedback-${q.id}" class="text-xs font-bold px-3 py-1 rounded-full hidden"></span>
+                    </div>
+                    <p class="font-bold text-white text-md leading-relaxed">${q.question}</p>
+                    <div class="grid grid-cols-1 gap-3">
+                        ${optionsHtml}
+                    </div>
+                    <div id="explanation-${q.id}" class="hidden p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-400 leading-relaxed">
+                        <strong class="text-teal-400 block mb-1"><i class="fa-solid fa-graduation-cap"></i> Professor's Guidance:</strong>
+                        ${q.explanation}
+                    </div>
+                `;
+                container.appendChild(qCard);
+            });
+        }
+
+        function submitQuizAnswer(qId, selectedIdx) {
+            // Guard: don't allow duplicate clicks
+            if (state.quizAnswers[qId] !== undefined) return;
+            
+            state.quizAnswers[qId] = selectedIdx;
+            const q = quizData.find(item => item.id === qId);
+            const isCorrect = selectedIdx === q.correct;
+            
+            const explanationBox = document.getElementById(`explanation-${qId}`);
+            const feedbackBadge = document.getElementById(`badge-feedback-${qId}`);
+            const selectedButton = document.getElementById(`opt-${qId}-${selectedIdx}`);
+            const correctButton = document.getElementById(`opt-${qId}-${q.correct}`);
+            
+            explanationBox.classList.remove('hidden');
+            feedbackBadge.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackBadge.textContent = "CORRECT +20 XP";
+                feedbackBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-500/20";
+                selectedButton.className = "w-full text-left p-4 rounded-xl bg-emerald-950/20 border-2 border-emerald-500/60 text-sm text-white flex items-start gap-3 transition";
+                document.getElementById(`bullet-${qId}-${selectedIdx}`).className = "w-5 h-5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-xs shrink-0 mt-0.5 font-bold";
+                document.getElementById(`bullet-${qId}-${selectedIdx}`).innerHTML = `<i class="fa-solid fa-check"></i>`;
+                state.scores.quizScore += 1;
+            } else {
+                feedbackBadge.textContent = "INCORRECT";
+                feedbackBadge.className = "text-xs font-bold px-3 py-1 rounded-full bg-red-950/80 text-red-400 border border-red-500/20";
+                selectedButton.className = "w-full text-left p-4 rounded-xl bg-red-950/20 border-2 border-red-500/60 text-sm text-white flex items-start gap-3 transition";
+                document.getElementById(`bullet-${qId}-${selectedIdx}`).className = "w-5 h-5 rounded-full bg-red-500 text-slate-950 flex items-center justify-center text-xs shrink-0 mt-0.5 font-bold";
+                document.getElementById(`bullet-${qId}-${selectedIdx}`).innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                
+                // Show correct answer too
+                correctButton.classList.add('border-emerald-500/40', 'bg-emerald-950/10');
+            }
+
+            // Check if all answered
+            if (Object.keys(state.quizAnswers).length === 5) {
+                evaluateFinalQuizResult();
+            }
+        }
+
+        function evaluateFinalQuizResult() {
+            const finalScoreDiv = document.getElementById('quiz-grading-card');
+            const finalScoreVal = document.getElementById('quiz-final-score');
+            const feedbackText = document.getElementById('quiz-feedback-sentence');
+            
+            finalScoreVal.textContent = `${state.scores.quizScore} / 5 Correct`;
+            
+            if (state.scores.quizScore === 5) {
+                feedbackText.textContent = "Perfect score! You exhibit excellent biotechnology intuition and strict focus on safety and purity protocols.";
+            } else if (state.scores.quizScore >= 3) {
+                feedbackText.textContent = "Solid work! You understand the foundational techniques, but reviewing the feedback on incorrect entries will improve your field efficiency.";
+            } else {
+                feedbackText.textContent = "It looks like some contamination vectors slipped by your defenses. Try reviewing the Core Concepts tab and practice the bench transfer steps again.";
+            }
+            
+            finalScoreDiv.classList.remove('hidden');
+            updateOverallProgress();
+            
+            document.getElementById('check-quiz').className = "fa-solid fa-circle-check text-emerald-500";
+        }
+
+        function resetQuiz() {
+            state.scores.quizScore = 0;
+            state.quizAnswers = {};
+            document.getElementById('quiz-grading-card').classList.add('hidden');
+            renderQuiz();
+            updateOverallProgress();
+        }
+
+        // Global Progress Sync
+        function updateOverallProgress() {
+            // Weights: Core Concepts read (20%), Lab practice (40%), Quiz performance (40% - 8% per correct answer)
+            let totalProgress = 0;
+            let xp = 0;
+            
+            if (state.scores.lectureComplete) {
+                totalProgress += 20;
+                xp += 20;
+                document.getElementById('check-lecture').className = "fa-solid fa-circle-check text-emerald-500";
+            }
+            
+            if (state.scores.labComplete) {
+                totalProgress += 40;
+                xp += 40;
+            }
+            
+            // Quiz score contribution (up to 40)
+            const quizContribution = state.scores.quizScore * 8;
+            totalProgress += quizContribution;
+            xp += state.scores.quizScore * 8;
+
+            document.getElementById('global-score').textContent = `${xp} / 100 XP`;
+            document.getElementById('overall-progress-text').textContent = `${totalProgress}%`;
+            
+            // Adjust border/ring gradient representation dynamically
+            const ring = document.getElementById('overall-progress-ring');
+            if (totalProgress === 100) {
+                ring.className = "w-12 h-12 rounded-full border-4 border-emerald-500 flex items-center justify-center relative overflow-hidden";
+            } else if (totalProgress > 50) {
+                ring.className = "w-12 h-12 rounded-full border-4 border-teal-500 flex items-center justify-center relative overflow-hidden";
+            }
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            renderQuiz();
+            updateOverallProgress();
+            updateProfessorDialogue();
+        };
+    </script>
+</body>
+</html>
